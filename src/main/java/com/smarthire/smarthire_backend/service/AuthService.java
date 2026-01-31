@@ -4,6 +4,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.smarthire.smarthire_backend.dto.AuthResponse;
 import com.smarthire.smarthire_backend.dto.LoginRequest;
@@ -11,15 +12,14 @@ import com.smarthire.smarthire_backend.dto.RegisterRequest;
 import com.smarthire.smarthire_backend.entity.Role;
 import com.smarthire.smarthire_backend.entity.User;
 import com.smarthire.smarthire_backend.enums.RoleName;
+import com.smarthire.smarthire_backend.exception.BadRequestException;
+import com.smarthire.smarthire_backend.exception.ResourceNotFoundException;
 import com.smarthire.smarthire_backend.repository.RoleRepository;
 import com.smarthire.smarthire_backend.repository.UserRepository;
 import com.smarthire.smarthire_backend.security.JwtService;
 
-import com.smarthire.smarthire_backend.exception.ResourceNotFoundException;
-import com.smarthire.smarthire_backend.exception.BadRequestException;
-
-
-@Service    
+@Service
+@Transactional
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -45,18 +45,18 @@ public class AuthService {
     // ✅ REGISTER
     public AuthResponse register(RegisterRequest request) {
 
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new BadRequestException("Email already exists");
+        String email = request.getEmail().toLowerCase().trim();
 
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new BadRequestException("Email already exists");
         }
 
         Role role = roleRepository.findByName(RoleName.ROLE_USER.name())
                 .orElseThrow(() -> new ResourceNotFoundException("ROLE_USER not found"));
 
-
         User user = new User();
         user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
+        user.setEmail(email);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(role);
 
@@ -71,10 +71,10 @@ public class AuthService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
-                        request.getPassword())
+                        request.getPassword()
+                )
         );
 
-        // 🔥 FIXED: generate token using email (String)
         String token = jwtService.generateToken(request.getEmail());
 
         return new AuthResponse(token, "Login successful");

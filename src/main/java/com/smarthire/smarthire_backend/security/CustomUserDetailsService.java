@@ -1,8 +1,5 @@
 package com.smarthire.smarthire_backend.security;
 
-import com.smarthire.smarthire_backend.entity.User;
-import com.smarthire.smarthire_backend.repository.UserRepository;
-
 import java.util.List;
 
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -10,6 +7,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import com.smarthire.smarthire_backend.entity.User;
+import com.smarthire.smarthire_backend.repository.UserRepository;
 
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
@@ -24,19 +24,20 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("User not found"));
+        String normalizedEmail = email.toLowerCase().trim();
 
-//        return org.springframework.security.core.userdetails.User
-//                .withUsername(user.getEmail())
-//                .password(user.getPassword())
-//                .authorities("ROLE_" + user.getRole().getName())
-//                .build();
+        User user = userRepository.findByEmail(normalizedEmail)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found with email: " + normalizedEmail));
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
                 user.getPassword(),
+                true,   // enabled
+                true,   // accountNonExpired
+                true,   // credentialsNonExpired
+                true,   // accountNonLocked
                 List.of(new SimpleGrantedAuthority(user.getRole().getName()))
-            );
+        );
     }
 }
