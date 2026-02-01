@@ -32,8 +32,19 @@ public class ApplicationService {
         this.userRepository = userRepository;
     }
 
-    // ✅ USER: Apply for job
+    // =========================
+    // USER: Apply for a Job
+    // =========================
     public void applyToJob(Long jobId, String userEmail) {
+
+        // 🔒 Null safety checks
+        if (jobId == null) {
+            throw new BadRequestException("Job ID must not be null");
+        }
+
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new BadRequestException("User email must not be empty");
+        }
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() ->
@@ -58,8 +69,14 @@ public class ApplicationService {
         applicationRepository.save(application);
     }
 
-    // ✅ USER: View my applications
+    // =========================
+    // USER: View My Applications
+    // =========================
     public List<Application> getMyApplications(String userEmail) {
+
+        if (userEmail == null || userEmail.isBlank()) {
+            throw new BadRequestException("User email must not be empty");
+        }
 
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() ->
@@ -68,19 +85,31 @@ public class ApplicationService {
         return applicationRepository.findByUser(user);
     }
 
-    // ✅ ADMIN: View all applications
+    // =========================
+    // ADMIN / RECRUITER: View All Applications
+    // =========================
     public List<Application> getAllApplications() {
         return applicationRepository.findAll();
     }
 
-    // ✅ ADMIN: Update application status
+    // =========================
+    // ADMIN / RECRUITER: Update Application Status
+    // =========================
     public void updateStatus(Long id, String status) {
+
+        if (id == null) {
+            throw new BadRequestException("Application ID must not be null");
+        }
+
+        if (status == null || status.isBlank()) {
+            throw new BadRequestException("Status must not be empty");
+        }
 
         Application application = applicationRepository.findById(id)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Application not found"));
 
-        application.setStatus(status);
+        application.setStatus(status.toUpperCase());
         applicationRepository.save(application);
     }
 }
