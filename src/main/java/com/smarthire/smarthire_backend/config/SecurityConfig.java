@@ -65,31 +65,33 @@ public class SecurityConfig {
                         // Public endpoints
                         .requestMatchers(
                                 "/api/auth/**",
+                                "/auth/**",
                                 "/swagger-ui/**",
-                                "/v3/api-docs/**")
+                                "/v3/api-docs/**",
+                                "/ws/**")
                         .permitAll()
 
                         // ===== ADMIN =====
-                        .requestMatchers("/api/admin/**")
+                        .requestMatchers("/api/admin/**", "/admin/**")
                         .hasAuthority("ROLE_ADMIN")
 
                         // ===== JOBS =====
-                        .requestMatchers(HttpMethod.GET, "/api/jobs/**")
-                        .hasAnyAuthority("ROLE_CANDIDATE", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/jobs/**", "/jobs/**")
+                        .hasAnyAuthority("ROLE_CANDIDATE", "ROLE_USER", "ROLE_ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/jobs/**")
+                        .requestMatchers(HttpMethod.POST, "/api/jobs/**", "/jobs/**")
                         .hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/api/jobs/**")
+                        .requestMatchers(HttpMethod.PUT, "/api/jobs/**", "/jobs/**")
                         .hasAuthority("ROLE_ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/api/jobs/**")
+                        .requestMatchers(HttpMethod.DELETE, "/api/jobs/**", "/jobs/**")
                         .hasAuthority("ROLE_ADMIN")
 
                         // ===== APPLICATIONS =====
-                        .requestMatchers(HttpMethod.GET, "/api/applications/**")
-                        .hasAnyAuthority("ROLE_CANDIDATE", "ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/applications/**", "/applications/**")
+                        .hasAnyAuthority("ROLE_CANDIDATE", "ROLE_USER", "ROLE_ADMIN")
 
-                        .requestMatchers(HttpMethod.POST, "/api/applications/**")
-                        .hasAuthority("ROLE_CANDIDATE")
+                        .requestMatchers(HttpMethod.POST, "/api/applications/**", "/applications/**")
+                        .hasAnyAuthority("ROLE_CANDIDATE", "ROLE_USER")
 
                         .anyRequest().authenticated())
 

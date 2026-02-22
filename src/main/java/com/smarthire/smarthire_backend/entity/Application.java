@@ -9,14 +9,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(
-    name = "applications",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"user_id", "job_id"})
-    }
-)
+@Table(name = "applications", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "user_id", "job_id" })
+})
 public class Application {
 
     @Id
@@ -33,6 +31,9 @@ public class Application {
 
     @Column(nullable = false)
     private String status = "APPLIED";
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
     // getters & setters
 
@@ -66,5 +67,14 @@ public class Application {
 
     public void setStatus(String status) {
         this.status = status;
+        this.updatedAt = LocalDateTime.now();
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

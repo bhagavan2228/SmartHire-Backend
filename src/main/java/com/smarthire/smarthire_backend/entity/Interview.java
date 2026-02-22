@@ -3,20 +3,25 @@ package com.smarthire.smarthire_backend.entity;
 import com.smarthire.smarthire_backend.enums.InterviewStatus;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "interviews")
 public class Interview {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "job_application_id", nullable = false)
-    private JobApplication jobApplication;
+	@OneToOne
+	@JoinColumn(name = "application_id", nullable = false)
+	private Application application;
 
-    @Enumerated(EnumType.STRING)
-    private InterviewStatus status;
+	@Enumerated(EnumType.STRING)
+	private InterviewStatus status;
+
+	private LocalDateTime date;
+	private String type; // ONLINE, ONSITE
 
 	public Long getId() {
 		return id;
@@ -26,12 +31,12 @@ public class Interview {
 		this.id = id;
 	}
 
-	public JobApplication getJobApplication() {
-		return jobApplication;
+	public Application getApplication() {
+		return application;
 	}
 
-	public void setJobApplication(JobApplication jobApplication) {
-		this.jobApplication = jobApplication;
+	public void setApplication(Application application) {
+		this.application = application;
 	}
 
 	public InterviewStatus getStatus() {
@@ -42,16 +47,34 @@ public class Interview {
 		this.status = status;
 	}
 
-	public Interview(Long id, JobApplication jobApplication, InterviewStatus status) {
+	public LocalDateTime getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDateTime date) {
+		this.date = date;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Interview(Long id, Application application, InterviewStatus status, LocalDateTime date, String type) {
 		super();
 		this.id = id;
-		this.jobApplication = jobApplication;
+		this.application = application;
 		this.status = status;
+		this.date = date;
+		this.type = type;
 	}
 
 	public Interview() {
 		super();
 		// TODO Auto-generated constructor stub
 	}
-    
+
 }
