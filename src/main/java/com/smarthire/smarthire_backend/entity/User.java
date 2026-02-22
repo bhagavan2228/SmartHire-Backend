@@ -20,6 +20,9 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(name = "company_id")
+    private Long companyId;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
@@ -66,12 +69,20 @@ public class User {
         this.role = role;
     }
 
-    public User() {
-		super();
-		// TODO Auto-generated constructor stub
-	}
+    public Long getCompanyId() {
+        return companyId;
+    }
 
-	public User(String fullName, String email, String password, Role role) {
+    public void setCompanyId(Long companyId) {
+        this.companyId = companyId;
+    }
+
+    public User() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+    public User(String fullName, String email, String password, Role role) {
         this.fullName = fullName;
         this.email = email;
         this.password = password;

@@ -21,15 +21,18 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public ApplicationService(
             ApplicationRepository applicationRepository,
             JobRepository jobRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            NotificationService notificationService) {
 
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     // =========================
@@ -47,15 +50,12 @@ public class ApplicationService {
         }
 
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Job not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
-        boolean alreadyApplied =
-                applicationRepository.existsByUserAndJob(user, job);
+        boolean alreadyApplied = applicationRepository.existsByUserAndJob(user, job);
 
         if (alreadyApplied) {
             throw new BadRequestException("You have already applied for this job");
@@ -79,8 +79,7 @@ public class ApplicationService {
         }
 
         User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         return applicationRepository.findByUser(user);
     }
@@ -106,10 +105,15 @@ public class ApplicationService {
         }
 
         Application application = applicationRepository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("Application not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
 
         application.setStatus(status.toUpperCase());
-        applicationRepository.save(application);
+        Application savedApplication = applicationRepository.save(application);
+
+        // 🚀 FIRE REAL-TIME EVENT
+        notificationService.sendToUser(
+                savedApplication.getUser().getId(),
+                "APPLICATION_STATUS_UPDATED",
+                savedApplication);
     }
 }

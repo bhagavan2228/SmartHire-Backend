@@ -42,63 +42,60 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-            // Disable CSRF (JWT based)
-            .csrf(csrf -> csrf.disable())
+                // Disable CSRF (JWT based)
+                .csrf(csrf -> csrf.disable())
 
-            // Enable CORS
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Enable CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-            // Stateless session
-            .sessionManagement(session ->
-                session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+                // Stateless session
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            // Exception handling (401 + 403)
-            .exceptionHandling(ex -> ex
-                .authenticationEntryPoint(unauthorizedEntryPoint())
-                .accessDeniedHandler(customAccessDeniedHandler)
-            )
+                // Exception handling (401 + 403)
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(unauthorizedEntryPoint())
+                        .accessDeniedHandler(customAccessDeniedHandler))
 
-            // Authorization rules
-            .authorizeHttpRequests(auth -> auth
+                // Authorization rules
+                .authorizeHttpRequests(auth -> auth
 
-                // ✅ MUST be first (CORS preflight)
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        // ✅ MUST be first (CORS preflight)
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // Public endpoints
-                .requestMatchers(
-                    "/auth/**",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**"
-                ).permitAll()
+                        // Public endpoints
+                        .requestMatchers(
+                                "/auth/**",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/ws/**")
+                        .permitAll()
 
-                // ===== ADMIN =====
-                .requestMatchers("/admin/**")
-                    .hasAuthority("ROLE_ADMIN")
+                        // ===== ADMIN =====
+                        .requestMatchers("/admin/**")
+                        .hasAuthority("ROLE_ADMIN")
 
-                // ===== JOBS =====
-                .requestMatchers(HttpMethod.GET, "/jobs/**")
-                    .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        // ===== JOBS =====
+                        .requestMatchers(HttpMethod.GET, "/jobs/**")
+                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                .requestMatchers(HttpMethod.POST, "/jobs/**")
-                    .hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/jobs/**")
-                    .hasAuthority("ROLE_ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/jobs/**")
-                    .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/jobs/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/jobs/**")
+                        .hasAuthority("ROLE_ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/jobs/**")
+                        .hasAuthority("ROLE_ADMIN")
 
-                // ===== APPLICATIONS =====
-                .requestMatchers(HttpMethod.GET, "/applications/**")
-                    .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
+                        // ===== APPLICATIONS =====
+                        .requestMatchers(HttpMethod.GET, "/applications/**")
+                        .hasAnyAuthority("ROLE_USER", "ROLE_ADMIN")
 
-                .requestMatchers(HttpMethod.POST, "/applications/**")
-                    .hasAuthority("ROLE_USER")
+                        .requestMatchers(HttpMethod.POST, "/applications/**")
+                        .hasAuthority("ROLE_USER")
 
-                .anyRequest().authenticated()
-            )
+                        .anyRequest().authenticated())
 
-            // JWT filter
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                // JWT filter
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -106,8 +103,8 @@ public class SecurityConfig {
     // 401 handler
     @Bean
     public AuthenticationEntryPoint unauthorizedEntryPoint() {
-        return (request, response, authException) ->
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+        return (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED,
+                "Unauthorized");
     }
 
     // CORS configuration
@@ -119,8 +116,7 @@ public class SecurityConfig {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source =
-                new UrlBasedCorsConfigurationSource();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
         return source;
     }
