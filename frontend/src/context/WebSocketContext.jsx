@@ -23,7 +23,9 @@ export const WebSocketProvider = ({ children }) => {
             return;
         }
 
-        const socketUrl = 'http://localhost:8081/ws'; // Match your backend port
+        const socketUrl = import.meta.env.VITE_API_URL
+            ? `${import.meta.env.VITE_API_URL}/ws`
+            : 'http://localhost:8081/ws';
 
         const stompClient = new Client({
             // Using SockJS fallback due to potential CORS/Proxy issues with raw ws://
